@@ -1,0 +1,9 @@
+exportPattern("^[[:alpha:]]+")
+exportMethods(
+    "print",
+    "write" 
+)
+exportClasses(
+    "CONOP",
+     "CONOPinput" 
+)

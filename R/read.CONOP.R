@@ -1,7 +1,7 @@
 read.CONOP<-function(dir){
 	CONOP<-new("CONOP")
 	cfg <- read.config(dir(dir, full.names=TRUE, pattern="\\.[cC][fF][gG]"))
-	sect <- read.table(paste(dir,cfg$`PARAMETERS THAT IDENTIFY THE INPUT DATA`['SECTFILE',1],sep="/"))
+	sect <- read.table(paste(dir,cfg$`PARAMETERS THAT IDENTIFY THE INPUT DATA`['SECTFILE',1],sep="/"),stringsAsFactors=FALSE)
 	evt<- read.table(paste(dir,cfg$`PARAMETERS THAT IDENTIFY THE INPUT DATA`['EVENTFILE',1],sep="/"))
 	n <- as.integer(as.character(cfg$`PARAMETERS THAT IDENTIFY THE INPUT DATA`['TAXA',1]))*2 + as.integer(as.character(cfg$`PARAMETERS THAT IDENTIFY THE INPUT DATA`['EVENTS',1]))
 	unloadmain <- paste(dir,cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['UNLOADMAIN',1], sep="/")
@@ -17,44 +17,46 @@ read.CONOP<-function(dir){
 			s <- as.numeric(gsub(" *TOTAL PENALTY FOR BEST SEQUENCE: *","",temp[grep("TOTAL PENALTY FOR BEST SEQUENCE:", temp)]))
 			names(s) <- "Total penalty for best sequence"
 			}
-	CONOP@Summary <- s; CONOP@Config <- cfg; CONOP@Sectfile <- as.data.frame(sect); CONOP@Eventfile <- as.data.frame(evt)
+	CONOP@Summary <- s; CONOP@Config <- cfg
+	CONOP@Sectfile <- as.data.frame(sect,stringsAsFactors=FALSE)
+	CONOP@Eventfile <- as.data.frame(evt,stringsAsFactors=FALSE)
 	
-	if(cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['OBS_OUT',1]=="ON"){
-		ind <- grep("OBSERVED HORIZONS",temp)
-		ind <- ind + grep("\\[",temp[(ind+1):length(temp)])[1]
-		x <- temp[ind:(ind+n-1)]
-		do.call(rbind,strsplit(x,split="[\\[\\]]", perl=TRUE))->y
+	if (!substr(cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['OBSDFILE',1],1,3)%in%c("off","OFF")){
+		a <- gsub("^[aA][dD][dD]","",cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['OBSDFILE',1])
+		obsdfile <- readLines(paste(dir,a,sep="/"))
 		options(warn=-1)
-		apply(do.call(rbind,strsplit(paste(y[,1],y[,3],sep=" "),split=" +", perl=TRUE))[,-1],2,as.numeric)->obsdfile
+		obsdfile <- apply(do.call(rbind,strsplit(obsdfile, split=" +"))[,-1], 2, as.numeric)
 		options(warn=0)
 		colnames(obsdfile)<-c("Event","type",CONOP@Sectfile[,2])
+		obsdfile[obsdfile==0]<-NA
 		CONOP@Obsdfile <- obsdfile
-		} else if (!substr(cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['OBSDFILE',1],1,3)%in%c("off","OFF")){
-			a <- gsub("^[aA][dD][dD]","",cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['OBSDFILE',1])
-			obsdfile <- readLines(paste(dir,a,sep="/"))
+		} else if(cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['OBS_OUT',1]=="ON"){
+			ind <- grep("OBSERVED HORIZONS",temp)
+			ind <- ind + grep("\\[",temp[(ind+1):length(temp)])[1]
+			x <- temp[ind:(ind+n-1)]
+			do.call(rbind,strsplit(x,split="[\\[\\]]", perl=TRUE))->y
 			options(warn=-1)
-			obsdfile <- apply(do.call(rbind,strsplit(obsdfile, split=" +"))[,-1], 2, as.numeric)
+			apply(do.call(rbind,strsplit(paste(y[,1],y[,3],sep=" "),split=" +", perl=TRUE))[,-1],2,as.numeric)->obsdfile
 			options(warn=0)
 			colnames(obsdfile)<-c("Event","type",CONOP@Sectfile[,2])
-			obsdfile[obsdfile==0]<-NA
 			CONOP@Obsdfile <- obsdfile
 			}
 	
-	if(cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['LOC_OUT',1]=="ON"){
-		ind <- grep("THE LINE OF CORRELATION",temp)
-		ind <- ind + grep("\\[",temp[(ind+1):length(temp)])[1]
-		x <- temp[ind:(ind+n-1)]
-		y <- do.call(rbind,strsplit(x,split="[\\[\\]]", perl=TRUE))
+	if (!substr(cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['PLCDFILE',1],1,3)%in%c("off","OFF")){
+		a <- gsub("^[aA][dD][dD]","",cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['PLCDFILE',1])
+		plcdfile <- readLines(paste(dir,a,sep="/"))
 		options(warn=-1)
-		apply(do.call(rbind,strsplit(paste(y[,1],y[,3],sep=" "),split=" +", perl=TRUE))[,-1],2,as.numeric)->plcdfile
+		plcdfile <- apply(do.call(rbind,strsplit(plcdfile, split=" +"))[,-1], 2, as.numeric)
 		options(warn=0)
 		colnames(plcdfile)<-c("Event","type",CONOP@Sectfile[,2])
 		CONOP@Plcdfile <- plcdfile
-		} else if (!substr(cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['PLCDFILE',1],1,3)%in%c("off","OFF")){
-			a <- gsub("^[aA][dD][dD]","",cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['PLCDFILE',1])
-			plcdfile <- readLines(paste(dir,a,sep="/"))
+		} else if(cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['LOC_OUT',1]=="ON"){
+			ind <- grep("THE LINE OF CORRELATION",temp)
+			ind <- ind + grep("\\[",temp[(ind+1):length(temp)])[1]
+			x <- temp[ind:(ind+n-1)]
+			y <- do.call(rbind,strsplit(x,split="[\\[\\]]", perl=TRUE))
 			options(warn=-1)
-			plcdfile <- apply(do.call(rbind,strsplit(plcdfile, split=" +"))[,-1], 2, as.numeric)
+			apply(do.call(rbind,strsplit(paste(y[,1],y[,3],sep=" "),split=" +", perl=TRUE))[,-1],2,as.numeric)->plcdfile
 			options(warn=0)
 			colnames(plcdfile)<-c("Event","type",CONOP@Sectfile[,2])
 			CONOP@Plcdfile <- plcdfile
@@ -74,23 +76,23 @@ read.CONOP<-function(dir){
 			CONOP@Composfile <- composfile
 			}
 	
-	if(cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['INCR_OUT',1]=="ON"){
-		ind <- grep("INCREMENTAL",temp)
-		for(i in ind){
-			ind2 <- i+grep("\\[",temp[-(1:i)])[1]
-			if(length(grep("WARNING",temp[ind2:(ind2+n-1)]))>=0){ x <- temp[ind2:(ind2+n-1)]}
-			}
-		y <- do.call(rbind,strsplit(x,split="[\\[\\]]", perl=TRUE))
+	if (!substr(cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['EXTNFILE',1],1,3)%in%c("off","OFF")){
+		a <- gsub("^[aA][dD][dD]","",cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['EXTNFILE',1])
+		extnfile <- readLines(paste(dir,a,sep="/"))
 		options(warn=-1)
-		extnfile <- apply(do.call(rbind,strsplit(paste(y[,1],y[,3],sep=" "),split=" +", perl=TRUE))[,-1],2,as.numeric)
+		extnfile <- apply(do.call(rbind,strsplit(extnfile, split=" +"))[,-1], 2, as.numeric)
 		options(warn=0)
 		colnames(extnfile)<-c("Event","type",CONOP@Sectfile[,2])
 		CONOP@Extnfile <- extnfile
-		} else if (!substr(cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['EXTNFILE',1],1,3)%in%c("off","OFF")){
-			a <- gsub("^[aA][dD][dD]","",cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['EXTNFILE',1])
-			extnfile <- readLines(paste(dir,a,sep="/"))
+		} else if(cfg$`PARAMETERS THAT DETERMINE THE NATURE AND LOCATION OF OUTPUT`['INCR_OUT',1]=="ON"){
+			ind <- grep("INCREMENTAL",temp)
+			for(i in ind){
+				ind2 <- i+grep("\\[",temp[-(1:i)])[1]
+				if(length(grep("WARNING",temp[ind2:(ind2+n-1)]))>=0){ x <- temp[ind2:(ind2+n-1)]}
+				}
+			y <- do.call(rbind,strsplit(x,split="[\\[\\]]", perl=TRUE))
 			options(warn=-1)
-			extnfile <- apply(do.call(rbind,strsplit(extnfile, split=" +"))[,-1], 2, as.numeric)
+			extnfile <- apply(do.call(rbind,strsplit(paste(y[,1],y[,3],sep=" "),split=" +", perl=TRUE))[,-1],2,as.numeric)
 			options(warn=0)
 			colnames(extnfile)<-c("Event","type",CONOP@Sectfile[,2])
 			CONOP@Extnfile <- extnfile

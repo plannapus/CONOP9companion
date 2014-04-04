@@ -18,6 +18,6 @@ sect.range<-function(CONOP, section, cex=0.8){
 				j,plcdfile[plcdfile[,1]==J[j] & plcdfile[,2]==2,Nsect+2], lwd=4, col="red")
 		segments(j,obsdfile[obsdfile[,1]==J[j] & obsdfile[,2]==1,Nsect+2],
 				j,obsdfile[obsdfile[,1]==J[j] & obsdfile[,2]==2,Nsect+2], lwd=2, col="black")
-		mtext(eventfile[j,3],las=2, at=j, cex=cex, line=0.5)
+		mtext(eventfile[J[j],3],las=2, at=j, cex=cex, line=0.5)
 		}
 	}

@@ -2,7 +2,7 @@ collection.quality<-function(CONOP, section){
 	CONOP@Obsdfile->obsdfile
 	CONOP@Plcdfile->plcdfile
 	CONOP@Eventfile->eventfile
-	if(nchar(site)<=3){CONOP@Sectfile[CONOP@Sectfile[,2]==section,1]->SITE}else{CONOP@Sectfile[CONOP@Sectfile[,4]==section,1]->SITE}
+	if(nchar(section)<=3){CONOP@Sectfile[CONOP@Sectfile[,2]==section,1]->SITE}else{CONOP@Sectfile[CONOP@Sectfile[,4]==section,1]->SITE}
 	layout(matrix(1:3,nrow=1),width=c(10,1,10))
 	par(mar=c(3,3,3,0))
 	x <- sapply(unique(plcdfile[,SITE+2]), function(x){sum(plcdfile[,SITE+2]==x)})

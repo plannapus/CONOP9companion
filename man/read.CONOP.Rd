@@ -8,7 +8,7 @@ Read the output of CONOP9.
 \description{
 \code{read.CONOP} reads all output of CONOP9 and create an object of class \code{CONOP}.  
 \code{read.config} is a function to read the configuration file (both input and output).  
-\code{read.cpchrt} is a function to read the CONOP9 additional output file \code{cpchrt}. Needed for \link{\code{culling}}.
+\code{read.cpchrt} is a function to read the CONOP9 additional output file \code{cpchrt}. Needed for \code{\link[Graphs]{culling}}.
 }
 \usage{
 read.CONOP(dir)

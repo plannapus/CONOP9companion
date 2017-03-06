@@ -1,4 +1,4 @@
-setClass("CONOPinput", representation(Config="list", Sectfile="data.frame", Eventfile="data.frame", Loadfile= "data.frame"))
+setClass("CONOPinput", slots=c(Config="list", Sectfile="data.frame", Eventfile="data.frame", Loadfile= "data.frame"))
 setMethod(f="write", signature="CONOPinput", definition=function(x){
 	write.table(x@Loadfile, file=as.character(x@Config$"PARAMETERS THAT IDENTIFY THE INPUT DATA"$Value[7]), sep=" ", row.names=FALSE, col.names=FALSE, quote=FALSE)
 	ev <- x@Eventfile

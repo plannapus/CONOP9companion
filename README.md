@@ -7,5 +7,5 @@ Version: 1.0
 Date: 2013-09-23  
 Author: Johan Renaudie  
 Description: Help preparing input files of CONOP9, read output files of CONOP9 and a few functions to plot and analyze the data.  
-License: GPL  
+License: MIT  
 Depends: methods  
